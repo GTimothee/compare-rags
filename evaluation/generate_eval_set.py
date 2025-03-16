@@ -76,14 +76,14 @@ Give your answers on a scale of 1 to 5, where 1 is the lowest rating and 5 is th
 
 Provide your answer as a JSON object with the following structure:
 {{
-    "groundedness": {
+    "groundedness": {{
         "evaluation": "(your rationale for the rating, as a text)",
         "total_rating": (your rating, as a number between 1 and 5)
-    },
-    "standalone": {
+    }},
+    "standalone": {{
         "evaluation": "(your rationale for the rating, as a text)",
         "total_rating": (your rating, as a number between 1 and 5)
-    }
+    }}
 }}
 
 You MUST provide values for 'evaluation' and 'total_rating' for each criterion in your answer.
@@ -191,7 +191,7 @@ def generate_qa_pairs(
 
 if __name__ == "__main__":
 
-    N_DOCS = 30
+    N_DOCS = 3
 
     print('Loading dataset...')
     ds = datasets.load_dataset("m-ric/huggingface_doc", split="train").select(range(N_DOCS))
@@ -220,7 +220,7 @@ if __name__ == "__main__":
     print('Saving QA pairs...')
     
     os.makedirs(args.output_dir, exist_ok=True)
-    output_path = os.path.join(args.output_dir, 'qa_pairs.json')
+    output_path = os.path.join(args.output_dir, f'qa_pairs_{N_DOCS}.json')
 
     with open(output_path, 'w') as f:
         json.dump(qa_pairs, f, indent=4)
