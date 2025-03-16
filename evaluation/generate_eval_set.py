@@ -3,10 +3,10 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document as LangchainDocument
 import datasets
 import logging
+import json
 import os
 from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
-from langchain_core.prompt_values import PromptValue
 from langchain_core.output_parsers import JsonOutputParser
 import sys
 import argparse
@@ -40,11 +40,11 @@ Generation rules for the answers:
 - Each answer should be a concise piece of factual information from the context that answers the corresponding factoid question.
 - Each answer should be a single sentence.
 
-Provide your answer as a JSON object with key "data", containing a list of dictionaries, where each dictionary has two keys: "question" and "answer".
+Provide your answer as a JSON object containing a list of dictionaries, where each dictionary has two keys: "question" and "answer".
 
 Example:
 {
-    "data": [
+    [
         {
             "question": (your factoid question),
             "answer": (your answer to the factoid question)
@@ -75,16 +75,7 @@ Your task is to provide three 'total ratings' based on the following criteria:
 Give your answers on a scale of 1 to 5, where 1 is the lowest rating and 5 is the highest rating.
 
 Provide your answer as a JSON object with the following structure:
-{
-    "groundedness": {
-        "evaluation": "(your rationale for the rating, as a text)",
-        "total_rating": (your rating, as a number between 1 and 5)
-    },
-    "standalone": {
-        "evaluation": "(your rationale for the rating, as a text)",
-        "total_rating": (your rating, as a number between 1 and 5)
-    }
-}
+{example_str}
 
 You MUST provide values for 'evaluation' and 'total_rating' for each criterion in your answer.
 
@@ -95,6 +86,18 @@ Now here are the question and context.
 Question: {question}\n
 Context: {context}\n
 """
+
+
+example_str = json.dumps({
+    "groundedness": {
+        "evaluation": "(your rationale for the rating, as a text)",
+        "total_rating": "(your rating, as a number between 1 and 5)"
+    },
+    "standalone": {
+        "evaluation": "(your rationale for the rating, as a text)",
+        "total_rating": "(your rating, as a number between 1 and 5)"
+    }
+})
 
 
 def chunk_data(langchain_docs: list[LangchainDocument]) -> list[LangchainDocument]:
@@ -127,14 +130,15 @@ def generate_qa_pairs(
 
         # generate pairs
         logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
-        output_QA_couple = generation_chain.invoke(PromptValue({"context": chunk.page_content}))
+        qa_pairs_list = generation_chain.invoke({"context": chunk.page_content})
 
         try:
-            logging.info(f"- Parsing generation output: {output_QA_couple}")
-            qa_pairs_list = output_QA_couple["data"]
+            assert qa_pairs_list
+            assert isinstance(qa_pairs_list, list)
+            assert len(qa_pairs_list)
         except Exception as e:
-            logging.error(f"Error while parsing the generation output: {e}")
-            continue
+                logging.error(f"Error while parsing generation output: {e}")
+                continue
         
         # for each pair
         for qa_pair in qa_pairs_list:
@@ -156,7 +160,7 @@ def generate_qa_pairs(
                 critique = critique_chain.invoke(
                     {
                         "question": question,
-                        "context": answer,
+                        "context": answer
                     }
                 )
             except Exception as e:
@@ -213,8 +217,8 @@ if __name__ == "__main__":
         model_name="Llama-3-70B-Instruct",
         temperature=0.0,
     )
-    generation_chain = llm | PromptTemplate.from_template(QA_generation_prompt) | JsonOutputParser()
-    critique_chain = llm | PromptTemplate.from_template(combined_critique_prompt) | JsonOutputParser()
+    generation_chain = PromptTemplate.from_template(QA_generation_prompt) | llm | JsonOutputParser()
+    critique_chain = PromptTemplate.from_template(combined_critique_prompt).partial(example_str=example_str) | llm | JsonOutputParser()
     qa_pairs = generate_qa_pairs(generation_chain, critique_chain, chunks)
     
     print('Number of QA pairs:', len(qa_pairs))
