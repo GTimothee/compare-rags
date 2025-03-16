@@ -6,6 +6,7 @@ import logging
 import os
 from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
+from langchain_core.prompt_values import PromptValue
 from langchain_core.output_parsers import JsonOutputParser
 import sys
 import argparse
@@ -126,7 +127,7 @@ def generate_qa_pairs(
 
         # generate pairs
         logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
-        output_QA_couple = generation_chain.invoke({"context": chunk.page_content})
+        output_QA_couple = generation_chain.invoke(PromptValue({"context": chunk.page_content}))
 
         try:
             logging.info(f"- Parsing generation output: {output_QA_couple}")
