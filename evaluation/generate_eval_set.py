@@ -4,10 +4,11 @@ from langchain.docstore.document import Document as LangchainDocument
 import datasets
 import logging
 import os
-from langchain_openai import OpenAI
-from langchain.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI, OpenAI
+from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 import sys
+from langchain_core.messages import HumanMessage, SystemMessage
 import argparse
 from dotenv import load_dotenv
 import json
@@ -30,7 +31,7 @@ args = parser.parse_args()
 
 
 QA_generation_prompt = """You are a helpful assistant.
-Your task is to write a list of factoid question/answer pairs, given a context.
+Your task is to write a list of factoid question/answer pairs, given a context given by the user.
 
 Generation rules for the factoid questions:
 - Each factoid question should be answerable with a specific, concise piece of factual information from the context.
@@ -54,16 +55,13 @@ Example:
 }}
 
 IMPORTANT: Only output the JSON object, nothing else. Do not add any additional information or context. Failure to comply will incur a grade of 0.
-
-Now here is the context:
-{context}
 """
 
 combined_critique_prompt = """
-You will be given a context and a question.
+You will be given a context and the associated question and answer pair.
 Your task is to provide three 'total ratings' based on the following criteria:
 
-1. Groundedness: How well one can answer the given question unambiguously with the given context.
+1. Groundedness: How well one can find the answer to the given question unambiguously with the given context.
     Give your answer on a scale of 1 to 5, where 1 means that the question is not answerable at all given the context, and 5 means that the question is clearly and unambiguously answerable with the context.
 
 2. Standalone: How context-independent this question is.
@@ -72,28 +70,29 @@ Your task is to provide three 'total ratings' based on the following criteria:
     The questions can contain obscure technical nouns or acronyms like Gradio, Hub, Hugging Face or Space and still be a 5: it must simply be clear to an operator with access to documentation what the question is about.
     For instance, "What is the name of the checkpoint from which the ViT model is imported?" should receive a 1, since there is an implicit mention of a context, thus the question is not independent from the context.
 
+3. Answer consistency: The answer makes sense, is really answering the question and can be found by the user using the context.
+
 Give your answers on a scale of 1 to 5, where 1 is the lowest rating and 5 is the highest rating.
 
 Provide your answer as a JSON object with the following structure:
 {{
-    "groundedness": {
+    "groundedness": {{
         "evaluation": "(your rationale for the rating, as a text)",
         "total_rating": (your rating, as a number between 1 and 5)
-    },
-    "standalone": {
+    }},
+    "standalone": {{
         "evaluation": "(your rationale for the rating, as a text)",
         "total_rating": (your rating, as a number between 1 and 5)
-    }
+    }},
+    "consistency": {{
+        "evaluation": "(your rationale for the rating, as a text)",
+        "total_rating": (your rating, as a number between 1 and 5)
+    }}
 }}
 
 You MUST provide values for 'evaluation' and 'total_rating' for each criterion in your answer.
 
 IMPORTANT: Only output the JSON object, nothing else. Do not add any additional information or context. Failure to comply will incur a grade of 0.
-
-Now here are the question and context.
-
-Question: {question}\n
-Context: {context}\n
 """
 
 
@@ -121,11 +120,15 @@ def generate_qa_pairs(
     outputs = []
     logging.info("Generating QA pairs from chunks...")
 
+    total_pairs_generated = 0
+    total_pairs_kept = 0
+
     for chunk in tqdm(chunks):
 
         # generate pairs
         logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
-        qa_pairs_list = generation_chain.invoke({"context": chunk.page_content})
+        qa_pairs_list = generation_chain.invoke(
+            {"messages": [HumanMessage(content=f"Here is the context:```{chunk.page_content}```")]})
 
         try:
             assert qa_pairs_list
@@ -135,6 +138,9 @@ def generate_qa_pairs(
                 logging.error(f"Error while parsing generation output: {e}")
                 continue
         
+        total_pairs_generated += len(qa_pairs_list)
+        logging.info(f"Generated {len(qa_pairs_list)} QA pairs for document {chunk.metadata['source']}")
+
         # for each pair
         for qa_pair in qa_pairs_list:
 
@@ -153,10 +159,8 @@ def generate_qa_pairs(
             try:
                 logging.info(f"- Generating critique for question: {question}")
                 critique = critique_chain.invoke(
-                    {
-                        "question": question,
-                        "context": answer,
-                    }
+                    (
+                        {"messages": [HumanMessage(content=f"Question:{question}\nAnswer:{answer}\nContext:```{chunk.page_content}```")]})
                 )
             except Exception as e:
                 logging.error(f"Error while generating critique: {e}")
@@ -167,9 +171,11 @@ def generate_qa_pairs(
                 logging.info(f"- Parsing critique output: {critique}")
                 groundedness = critique['groundedness']
                 standalone = critique['standalone']
+                consistency = critique['consistency']
 
                 assert groundedness['total_rating'] >= 4, f"Question is not grounded (score={groundedness['evaluation']})"
                 assert standalone['total_rating'] >= 4, f"Question is not standalone (score={standalone['evaluation']})"
+                assert consistency['total_rating'] >= 4, f"Answer is not consistent (score={consistency['evaluation']})"
 
             except Exception as e:
                 logging.error(f"Error while evaluating the critique output: {e}")
@@ -185,7 +191,20 @@ def generate_qa_pairs(
                     "source_doc": chunk.metadata["source"],
                 }
             )
-        
+
+            total_pairs_kept += 1
+            
+    logging.info(f"Total QA pairs generated: {total_pairs_generated}")
+    logging.info(f"Total QA pairs kept: {total_pairs_kept}")
+    print(f"Total QA pairs generated: {total_pairs_generated}")
+    print(f"Total QA pairs kept: {total_pairs_kept}")
+    if total_pairs_generated > 0:
+        ratio = total_pairs_kept / total_pairs_generated
+    else:
+        ratio = 0
+    logging.info(f"Ratio of QA pairs kept: {ratio:.2f}")
+    print(f"Ratio of QA pairs kept: {ratio:.2f}")
+
     return outputs
 
 
@@ -204,7 +223,7 @@ if __name__ == "__main__":
     chunks = chunk_data(langchain_docs)
 
     print('Generating QA pairs...')
-    llm = OpenAI(
+    llm = ChatOpenAI(
         openai_api_base=os.getenv("OPENAI_BASE_URL"),
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         timeout=60,
@@ -212,8 +231,27 @@ if __name__ == "__main__":
         model_name="Llama-3-70B-Instruct",
         temperature=0.0,
     )
-    generation_chain = PromptTemplate.from_template(QA_generation_prompt) | llm | JsonOutputParser()
-    critique_chain = PromptTemplate.from_template(combined_critique_prompt) | llm | JsonOutputParser()
+
+    generation_chain = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    QA_generation_prompt,
+                ),
+                ("placeholder", "{messages}"),
+            ]
+        ) | llm | JsonOutputParser()
+    
+    critique_chain = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    combined_critique_prompt,
+                ),
+                ("placeholder", "{messages}"),
+            ]
+        ) | llm | JsonOutputParser()
+    
     qa_pairs = generate_qa_pairs(generation_chain, critique_chain, chunks)
     
     print('Number of QA pairs:', len(qa_pairs))
