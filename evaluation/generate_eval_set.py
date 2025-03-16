@@ -10,6 +10,7 @@ from langchain_core.output_parsers import JsonOutputParser
 import sys
 import argparse
 from dotenv import load_dotenv
+import json
 
 
 load_dotenv()
@@ -222,4 +223,4 @@ if __name__ == "__main__":
     output_path = os.path.join(args.output_dir, 'qa_pairs.json')
 
     with open(output_path, 'w') as f:
-        f.write(str(qa_pairs))
+        json.dump(qa_pairs, f, indent=4)
