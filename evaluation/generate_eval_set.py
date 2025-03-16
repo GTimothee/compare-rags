@@ -9,6 +9,10 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 import sys
 import argparse
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 logging.basicConfig(
@@ -117,6 +121,8 @@ def generate_qa_pairs(
     logging.info("Generating QA pairs from chunks...")
 
     for chunk in tqdm(chunks):
+
+        print(f"page_content={chunk.page_content}")
 
         # generate pairs
         logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
