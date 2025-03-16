@@ -3,7 +3,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document as LangchainDocument
 import datasets
 import logging
-import json
 import os
 from langchain_openai import OpenAI
 from langchain.prompts import PromptTemplate
@@ -43,15 +42,15 @@ Generation rules for the answers:
 Provide your answer as a JSON object containing a list of dictionaries, where each dictionary has two keys: "question" and "answer".
 
 Example:
-{
+{{
     [
-        {
+        {{
             "question": (your factoid question),
             "answer": (your answer to the factoid question)
-        },
+        }},
         ...
     ]
-}
+}}
 
 IMPORTANT: Only output the JSON object, nothing else. Do not add any additional information or context. Failure to comply will incur a grade of 0.
 
@@ -75,7 +74,16 @@ Your task is to provide three 'total ratings' based on the following criteria:
 Give your answers on a scale of 1 to 5, where 1 is the lowest rating and 5 is the highest rating.
 
 Provide your answer as a JSON object with the following structure:
-{example_str}
+{{
+    "groundedness": {
+        "evaluation": "(your rationale for the rating, as a text)",
+        "total_rating": (your rating, as a number between 1 and 5)
+    },
+    "standalone": {
+        "evaluation": "(your rationale for the rating, as a text)",
+        "total_rating": (your rating, as a number between 1 and 5)
+    }
+}}
 
 You MUST provide values for 'evaluation' and 'total_rating' for each criterion in your answer.
 
@@ -86,18 +94,6 @@ Now here are the question and context.
 Question: {question}\n
 Context: {context}\n
 """
-
-
-example_str = json.dumps({
-    "groundedness": {
-        "evaluation": "(your rationale for the rating, as a text)",
-        "total_rating": "(your rating, as a number between 1 and 5)"
-    },
-    "standalone": {
-        "evaluation": "(your rationale for the rating, as a text)",
-        "total_rating": "(your rating, as a number between 1 and 5)"
-    }
-})
 
 
 def chunk_data(langchain_docs: list[LangchainDocument]) -> list[LangchainDocument]:
@@ -125,8 +121,6 @@ def generate_qa_pairs(
     logging.info("Generating QA pairs from chunks...")
 
     for chunk in tqdm(chunks):
-
-        print(f"page_content={chunk.page_content}")
 
         # generate pairs
         logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
@@ -160,7 +154,7 @@ def generate_qa_pairs(
                 critique = critique_chain.invoke(
                     {
                         "question": question,
-                        "context": answer
+                        "context": answer,
                     }
                 )
             except Exception as e:
@@ -218,7 +212,7 @@ if __name__ == "__main__":
         temperature=0.0,
     )
     generation_chain = PromptTemplate.from_template(QA_generation_prompt) | llm | JsonOutputParser()
-    critique_chain = PromptTemplate.from_template(combined_critique_prompt).partial(example_str=example_str) | llm | JsonOutputParser()
+    critique_chain = PromptTemplate.from_template(combined_critique_prompt) | llm | JsonOutputParser()
     qa_pairs = generate_qa_pairs(generation_chain, critique_chain, chunks)
     
     print('Number of QA pairs:', len(qa_pairs))
