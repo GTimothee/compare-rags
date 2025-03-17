@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     results = []
 
-    for sample_idx, sample in tqdm(enumerate(ds)):
+    for sample_idx, sample in tqdm(enumerate(ds), total=len(ds), desc="RAG evaluation running..."):
         logging.info(f"Processing sample {sample_idx}...")
 
         try:
