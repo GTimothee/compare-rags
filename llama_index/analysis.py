@@ -33,6 +33,11 @@ def analyze_results(results):
     normalized_accuracy = df['normalized_score'].mean()
     print(f"\nNormalized Accuracy: {normalized_accuracy:.2f}")
 
+    # Save results to JSON file
+    output_file = args.input_file.replace('.json', '_analysis.json')
+    df.to_json(output_file, orient='records', lines=True)
+    print(f"\nAnalysis results saved to {output_file}")
+
 
 if __name__ == "__main__":
     results = load_results(args.input_file)
