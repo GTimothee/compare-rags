@@ -30,20 +30,20 @@ parser.add_argument('output_dir', type=str, help='The directory where the QA pai
 args = parser.parse_args()
 
 
-QA_generation_prompt = """You are a helpful assistant.
-Your task is to write a list of factoid question/answer pairs, given a context given by the user.
+QA_generation_prompt = """Extract a list of fact-based question-answer pairs from the given text. Each question must be standalone, meaning it must be fully understandable without referring to the original passage.
+Rules for Questions:
 
-Generation rules for the factoid questions:
-- Each factoid question should be answerable with a specific, concise piece of factual information from the context.
-- Each factoid question should be formulated in the same style as questions users could ask in a search engine. This means that your factoid question MUST NOT mention something like "according to the passage" or "context".
+    The question must include all necessary context to be understood independently.
+    The question must be fact-based and refer to a specific detail in the text. Avoid vague references like ‘the overview’ or ‘the passage.’
+    The question should resemble a search engine query (e.g., ‘Who discovered gravity?’ instead of ‘Who is mentioned in the passage?’).
+    DO NOT use placeholders, ambiguous wording, or subjective interpretations.
 
-Generation rules for the answers:
-- Each answer should be a concise piece of factual information from the context that answers the corresponding factoid question.
-- Each answer should be a single sentence.
+Rules for Answers:
 
-Provide your answer as a JSON object containing a list of dictionaries, where each dictionary has two keys: "question" and "answer".
+    The answer must be a concise, factual sentence derived directly from the text.
+    The answer must be specific (avoid generalizations or assumptions).
 
-Example:
+Output Format (JSON only):
 {{
     [
         {{
@@ -54,27 +54,39 @@ Example:
     ]
 }}
 
-IMPORTANT: Only output the JSON object, nothing else. Do not add any additional information or context. Failure to comply will incur a grade of 0.
-"""
+Do not include any additional text—only the JSON object. Any extra content will result in a grade of 0."""
 
 combined_critique_prompt = """
-You will be given a context and the associated question and answer pair.
-Your task is to provide three 'total ratings' based on the following criteria:
+You will be given a context along with a question and answer pair. Your task is to provide three total ratings based on the following criteria:
+1. Groundedness (1-5)
 
-1. Groundedness: How well one can find the answer to the given question unambiguously with the given context.
-    Give your answer on a scale of 1 to 5, where 1 means that the question is not answerable at all given the context, and 5 means that the question is clearly and unambiguously answerable with the context.
+    5: The question is clearly and unambiguously answerable with the provided context. No ambiguity or missing details.
+    4: The question is answerable, but minor inference is needed.
+    3: The answer can be inferred, but some details are unclear.
+    2: The question is only partially answerable or too vague.
+    1: The question cannot be answered at all using the given context.
 
-2. Standalone: How context-independent this question is.
-    Give your answer on a scale of 1 to 5, where 1 means that the question depends on additional information to be understood, and 5 means that the question makes sense by itself.
-    For instance, if the question refers to a particular setting, like 'in the context' or 'in the document', the rating must be 1.
-    The questions can contain obscure technical nouns or acronyms like Gradio, Hub, Hugging Face or Space and still be a 5: it must simply be clear to an operator with access to documentation what the question is about.
-    For instance, "What is the name of the checkpoint from which the ViT model is imported?" should receive a 1, since there is an implicit mention of a context, thus the question is not independent from the context.
+2. Standalone Clarity (1-5)
 
-3. Answer consistency: The answer makes sense, is really answering the question and can be found by the user using the context.
+    5: The question is fully independent and understandable on its own. No reference to "the passage," "this context," etc.
+    4: The question is mostly standalone but could be slightly clearer.
+    3: Some missing context makes it harder to understand.
+    2: The question assumes external information not given.
+    1: The question is completely dependent on context references and is unclear.
 
-Give your answers on a scale of 1 to 5, where 1 is the lowest rating and 5 is the highest rating.
+3. Answer Consistency (1-5)
 
-Provide your answer as a JSON object with the following structure:
+    5: The answer is direct, correct, and explicitly found in the given context.
+    4: The answer is correct but could be more precise.
+    3: The answer is somewhat relevant but may be incomplete.
+    2: The answer is unclear or only partially addresses the question.
+    1: The answer does not match the question or is incorrect.
+
+Final Instructions:
+
+    Consider practical usability instead of being overly strict. If a reasonable human could understand and use the question-answer pair correctly, avoid penalizing too harshly.
+    Provide your answer as a JSON object with the following structure:
+
 {{
     "groundedness": {{
         "evaluation": "(your rationale for the rating, as a text)",
@@ -126,9 +138,13 @@ def generate_qa_pairs(
     for chunk in tqdm(chunks):
 
         # generate pairs
-        logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
-        qa_pairs_list = generation_chain.invoke(
-            {"messages": [HumanMessage(content=f"Here is the context:```{chunk.page_content}```")]})
+        try:
+            logging.info(f"Generating QA pairs for document {chunk.metadata['source']}...")
+            qa_pairs_list = generation_chain.invoke(
+                {"messages": [HumanMessage(content=f"Here is the context:```{chunk.page_content}```")]})
+        except Exception as e:
+            logging.error(f"Error while generating qa pair: {e}")
+            continue
 
         try:
             assert qa_pairs_list
@@ -210,7 +226,7 @@ def generate_qa_pairs(
 
 if __name__ == "__main__":
 
-    N_DOCS = 3
+    N_DOCS = 10
 
     print('Loading dataset...')
     ds = datasets.load_dataset("m-ric/huggingface_doc", split="train").select(range(N_DOCS))
