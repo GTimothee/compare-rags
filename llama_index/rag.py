@@ -20,7 +20,18 @@ class RAG:
         ) 
 
     def run(self, question: str):
-        return self.query_engine.query(question)
+        response = self.query_engine.query(question)
+        source_nodes = response.source_nodes
+        data = []
+        for node_with_score in source_nodes:
+            data.append({
+                'score': node_with_score.score,
+                'node_text': node_with_score.node.get_text()
+            })
+        return {
+            "text": response.response,
+            'context': data
+        }
 
 
 if __name__ == "__main__":
@@ -29,9 +40,10 @@ if __name__ == "__main__":
 
     for question in [
         "What is SQuAD?",
-        "What is the default CPU configuration for a created endpoint?"
+        # "What is the default CPU configuration for a created endpoint?"
     ]:
         print('****')
         print(f"Question: {question}")
         response = rag_engine.run(question)
-        print(f"Answer: {response}")
+        print(f"Answer: {response['text']}")
+        # print(f"Context: {response['context']}")
