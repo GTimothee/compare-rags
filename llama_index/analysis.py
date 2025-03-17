@@ -34,8 +34,14 @@ def analyze_results(results):
     print(f"\nNormalized Accuracy: {normalized_accuracy:.2f}")
 
     # Save results to JSON file
+    output_data = {
+        'normalized_accuracy': normalized_accuracy,
+        'raw_score_counts': raw_score_counts.to_dict(),
+        'normalized_score_counts': normalized_score_counts.to_dict()
+    }
     output_file = args.input_file.replace('.json', '_analysis.json')
-    df.to_json(output_file, orient='records', lines=True)
+    with open(output_file, 'w') as f:
+        json.dump(output_data, f, indent=4)
     print(f"\nAnalysis results saved to {output_file}")
 
 
