@@ -3,6 +3,11 @@ import pandas as pd
 import argparse
 
 
+parser = argparse.ArgumentParser(description='Analyze evaluation results.')
+parser.add_argument('input_file', type=str, help='The JSON file containing the evaluation results.')
+args = parser.parse_args()
+
+
 def load_results(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
@@ -30,9 +35,5 @@ def analyze_results(results):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Analyze evaluation results.')
-    parser.add_argument('input_file', type=str, help='The JSON file containing the evaluation results.')
-    args = parser.parse_args()
-    
     results = load_results(args.input_file)
     analyze_results(results)
