@@ -6,17 +6,26 @@ from build_graph import llm, embed_model
 
 load_dotenv()
 
+
+class RAG:
+    def __init__(self):
+        Settings.llm = llm
+        Settings.embed_model = embed_model
+
+        index = load_index_from_storage(
+            StorageContext.from_defaults(persist_dir='data/llama_index')
+        )
+        self.query_engine = index.as_query_engine(
+            include_text=True
+        ) 
+
+    def run(self, question: str):
+        return self.query_engine.query(question)
+
+
 if __name__ == "__main__":
 
-    Settings.llm = llm
-    Settings.embed_model = embed_model
-
-    index = load_index_from_storage(
-        StorageContext.from_defaults(persist_dir='data/llama_index')
-    )
-    query_engine = index.as_query_engine(
-        include_text=True
-    ) 
+    rag_engine = RAG()
 
     for question in [
         "What is SQuAD?",
@@ -24,5 +33,5 @@ if __name__ == "__main__":
     ]:
         print('****')
         print(f"Question: {question}")
-        response = query_engine.query(question)
+        response = rag_engine.run(question)
         print(f"Answer: {response}")
