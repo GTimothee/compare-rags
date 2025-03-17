@@ -16,7 +16,7 @@ class RAG:
             StorageContext.from_defaults(persist_dir='data/llama_index')
         )
         self.query_engine = index.as_query_engine(
-            include_text=True
+            # include_text=True
         ) 
 
     def run(self, question: str):
