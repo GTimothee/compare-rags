@@ -65,11 +65,12 @@ async def initialize_rag():
     rag = LightRAG(
         # working_dir="your/path",
         embedding_func=EmbeddingFunc(
-            embedding_dim=4096,
+            embedding_dim=1024,
             max_token_size=8192,
             func=embedding_func
         ), #openai_embed, # hf_embeddings
-        llm_model_func=llm_model_func
+        llm_model_func=llm_model_func,
+        llm_model_max_token_size=8000
     )
 
     await rag.initialize_storages()
@@ -81,7 +82,7 @@ async def initialize_rag():
 if __name__ == "__main__":
     rag = asyncio.run(initialize_rag())
     
-    ds = datasets.load_dataset("m-ric/huggingface_doc", split="train").select(range(8))
+    ds = datasets.load_dataset("m-ric/huggingface_doc", split="train").select(range(1))
 
     t = time.time()
     for index, doc in enumerate(tqdm(ds, desc="Processing documents")):
