@@ -82,7 +82,7 @@ async def initialize_rag():
 if __name__ == "__main__":
     rag = asyncio.run(initialize_rag())
     
-    ds = datasets.load_dataset("m-ric/huggingface_doc", split="train").select(range(1))
+    ds = datasets.load_dataset("m-ric/huggingface_doc", split="train").select(range(8))
 
     t = time.time()
     for index, doc in enumerate(tqdm(ds, desc="Processing documents")):
