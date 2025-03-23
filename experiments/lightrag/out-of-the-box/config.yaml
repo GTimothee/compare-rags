@@ -1,0 +1,7 @@
+---
+framework: "lightrag"
+description: "baseline lightrag configuration"  # description of the experiment
+dataset_path: "GTimothee/huggingface_doc_qa_10_docs"  # path to dataset on huggingface hub
+index_dirpath: "data/lightrag/"  # where to save the index on disk
+n_samples: 8  # number of documents from dataset to process
+output_dir: "experiments/lightrag/out-of-the-box"  # where to save the experiment outputs
