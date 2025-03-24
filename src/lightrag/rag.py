@@ -20,11 +20,15 @@ class LightRag:
     def run(self, question: str, mode="mix") -> dict:
         answer = self.rag.query(
             question,
-            param=QueryParam(mode=mode, top_k=3)
+            param=QueryParam(mode=mode, top_k=3, response_type='Single Paragraph')
+        )
+        context = self.rag.query(
+            question,
+            param=QueryParam(mode=mode, top_k=3, only_need_context=True)
         )
         return {
             "text": answer,
-            "context": None
+            "context": context
         }
 
     @staticmethod

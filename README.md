@@ -26,7 +26,7 @@ Each experiment has a dedicated folder in experiments/{framework}/{version}, wit
 
 0. Write a config file or use an existing one
 1. Build the db ```python scripts/build_graph.py experiments/{framework}/test/config.yaml```
-2. Test the RAG ```python scripts/test_rag.py experiments/{framework}/test/config.yaml "how to create an endpoint"```
+2. Test the RAG ```python scripts/test_rag.py experiments/{framework}/test/config.yaml "how to create an endpoint"``` (add ```--verbose``` to have a look at the context that has been retrieved)
 3. Run evaluation:
    1. evaluate
    2. analyze results
