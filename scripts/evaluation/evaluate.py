@@ -1,6 +1,5 @@
 
 from datasets import load_dataset
-from rag import RAG
 from tqdm import tqdm
 from dotenv import load_dotenv
 import logging
@@ -13,6 +12,7 @@ import argparse
 import json
 import yaml
 
+from src.lightrag.rag import LightRag
 from src.llama_index.llama_index_rag import LlamaIndexRag
 
 
@@ -56,6 +56,8 @@ if __name__ == "__main__":
     
     with open(args.config_path, 'r') as file:
         config = yaml.safe_load(file)
+    framework = config['framework']
+    index_dirpath = config['index_dirpath']
 
     logging.basicConfig(
         filename=f"{config['framework']}_evaluation.log",
@@ -64,10 +66,14 @@ if __name__ == "__main__":
         level=logging.INFO
     )
 
-    ds = load_dataset(config['dataset_path'])['train']
+    ds = load_dataset(config['eval_dataset_path'])['train']
 
-    if config['framework'] == "llama_index":
-        rag_engine = LlamaIndexRag(llm, embed_model)
+    if framework == "llama_index":
+        rag_engine = LlamaIndexRag(index_dirpath, config['llm'], config['embedding_model'])
+    elif framework == "lightrag":
+        rag_engine = LightRag(index_dirpath)
+    else: 
+        raise NotImplementedError(f"Unsupported framework: {framework}")
 
     llm = ChatOpenAI(
         openai_api_base=os.getenv("OPENAI_BASE_URL"),
@@ -133,7 +139,6 @@ if __name__ == "__main__":
         })
 
     print('Saving results...')
-    dataset_name = os.path.basename(config['dataset_path'])
-    output_path = os.path.join(args.output_dir, f'{dataset_name}_eval.json')
+    output_path = os.path.join(config['output_dir'], 'eval.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=4)
