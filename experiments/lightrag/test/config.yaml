@@ -5,5 +5,3 @@ dataset_path: "m-ric/huggingface_doc"  # path to source dataset on huggingface h
 index_dirpath: "data/lightrag/"  # where to save the index on disk
 n_samples: 1  # number of documents from dataset to process
 output_dir: "experiments/lightrag/test"  # where to save the experiment outputs
-llm: "openai-like" # "mistral"
-embedding_model: "openai-like" # "huggingface-sentence-transformers"

@@ -28,8 +28,8 @@ Each experiment has a dedicated folder in experiments/{framework}/{version}, wit
 1. Build the db ```python scripts/build_graph.py experiments/{framework}/test/config.yaml```
 2. Test the RAG ```python scripts/test_rag.py experiments/{framework}/test/config.yaml "how to create an endpoint"``` (add ```--verbose``` to have a look at the context that has been retrieved)
 3. Run evaluation:
-   1. evaluate
-   2. analyze results
+   1. evaluate ```python scripts/evaluation/evaluate.py experiments/{framework}/out-of-the-box/config.yaml```
+   2. analyze results ```python scripts/evaluation/analysis.py experiments/{framework}/out-of-the-box/eval.json```
 
 ### Example outputs for the test question "how to create an endpoint"
 
@@ -94,6 +94,7 @@ On the ["huggingface 10 docs"](https://huggingface.co/datasets/GTimothee/hugging
 | Framework | Config | Normalized accuracy |
 | --- | --- | --- |
 | llama-index | Out-of-the-box | 74.7% |
+| lightrag | Out-of-the-box | 81% |
 
 ## Source datasets
 
@@ -101,7 +102,7 @@ On the ["huggingface 10 docs"](https://huggingface.co/datasets/GTimothee/hugging
 - Link: https://huggingface.co/datasets/m-ric/huggingface_doc
 - Source: https://huggingface.co/learn/cookbook/en/rag_evaluation
 - The idea of the above cookbook was not bad at all: 1) generate db containing data from a 1000 documents and 2) generate a few questions from random chunks in the corpus. In a spirit of saving tokens and easier debugging, I decided to only process a few documents, and to evaluate only on that. That is why I generated a new test set. 
-- Generated evaluation dataset from the first 10 documents of the dataset: https://huggingface.co/datasets/GTimothee/huggingface_doc_qa_10_docs
+- Generated evaluation dataset from the first 10 documents of the dataset (139 questions/answers): https://huggingface.co/datasets/GTimothee/huggingface_doc_qa_10_docs
 
 ### MultiHopRAG
 // TODO
