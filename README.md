@@ -22,6 +22,10 @@ Each experiment has a dedicated folder in experiments/{framework}/{version}, wit
 - scritps/evaluation contains scripts to evaluate a rag config on a given evaluation set and analyze the results
 - scripts/{dataset} contains scripts linked to a given source dataset, for example scripts to generate evaluation sets
 
+## Running the scripts
+
+1. build the db ```python scripts/build_graph.py experiments/llama_index/test/config.yaml```
+
 ## Results
 
 On the ["huggingface 10 docs"](https://huggingface.co/datasets/GTimothee/huggingface_doc_qa_10_docs) evaluation dataset:

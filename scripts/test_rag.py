@@ -11,13 +11,13 @@ Note: of course ask a question that can be answered using the graph you built.
 
 from dotenv import load_dotenv
 import yaml
-from build_graph import llm, embed_model
-from src.lightrag.rag import LightRag
-from src.llama_index.llama_index_rag import LlamaIndexRag
 import argparse
 
+from src.lightrag.rag import LightRag
+from src.llama_index.llama_index_rag import LlamaIndexRag
+
 parser = argparse.ArgumentParser(description="Run rag with a question.")
-parser.add_argument('config', type=str, required=True, help='Path to the config file.')
+parser.add_argument('config', type=str, help='Path to the config file.')
 parser.add_argument('question', type=str, help='The question to ask the LlamaIndexRag engine.')
 parser.add_argument('--verbose', action='store_true', help='Increase verbosity. At the moment it just prints the context retrieved.')
 args = parser.parse_args()
