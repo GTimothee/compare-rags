@@ -20,7 +20,7 @@ class LightRag:
     def run(self, question: str, mode="mix") -> dict:
         answer = self.rag.query(
             question,
-            param=QueryParam(mode=mode)
+            param=QueryParam(mode=mode, top_k=3)
         )
         return {
             "text": answer,

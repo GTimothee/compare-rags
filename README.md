@@ -24,7 +24,68 @@ Each experiment has a dedicated folder in experiments/{framework}/{version}, wit
 
 ## Running the scripts
 
-1. build the db ```python scripts/build_graph.py experiments/llama_index/test/config.yaml```
+0. Write a config file or use an existing one
+1. Build the db ```python scripts/build_graph.py experiments/{framework}/test/config.yaml```
+2. Test the RAG ```python scripts/test_rag.py experiments/{framework}/test/config.yaml "how to create an endpoint"```
+3. Run evaluation:
+   1. evaluate
+   2. analyze results
+
+### Example outputs for the test question "how to create an endpoint"
+
+<details>
+<summary>Answer from llama-index</summary>
+To create an endpoint, follow these steps: 
+
+1. Enter the required Hugging Face Repository ID and your desired endpoint name.
+2. Select your Cloud Provider and region.
+3. Define the Security Level for the Endpoint.
+4. Create your Endpoint by clicking **Create Endpoint**. 
+5. Wait for the Endpoint to build, initialize, and run, which can take between 1 to 5 minutes.
+6. Test your Endpoint in the overview with the Inference widget.
+</details>
+<details>
+<summary>Answer from lightRAG (top_k=3)</summary>
+Creating an Endpoint on Hugging Face involves several steps, which are outlined below:
+
+**Step 1: Enter the Hugging Face Repository ID and your desired endpoint name**
+
+Go to the [Endpoint creation page](https://ui.endpoints.huggingface.co/new) and enter the Hugging Face Repository ID and your desired endpoint name.
+
+**Step 2: Select your Cloud Provider and region**
+
+Select your Cloud Provider (initially, only AWS is available) and region (either `us-east-1` or `eu-west-1`). You can also request to test Endpoints with other Cloud Providers or regions.
+
+**Step 3: Define the Security Level for the Endpoint**
+
+Define the Security Level for the Endpoint.
+
+**Step 4: Create your Endpoint**
+
+Click **Create Endpoint**. By default, your Endpoint is created with a medium CPU (2 x 4GB vCPUs with Intel Xeon Ice Lake). The cost estimate assumes the Endpoint will be up for an entire month and does not take autoscaling into account.
+
+**Step 5: Wait for the Endpoint to build, initialize, and run**
+
+Wait for the Endpoint to build, initialize, and run, which can take between 1 to 5 minutes.
+
+**Step 6: Test your Endpoint**
+
+Test your Endpoint in the overview with the Inference widget.
+
+Here's an example of how to deploy the `distilbert-base-uncased-finetuned-sst-2-english` model for text classification:
+
+<img src="https://raw.githubusercontent.com/huggingface/hf-endpoints-documentation/main/assets/1_repository.png" alt="select repository" />
+<img src="https://raw.githubusercontent.com/huggingface/hf-endpoints-documentation/main/assets/1_region.png" alt="select region" />
+<img src="https://raw.githubusercontent.com/huggingface/hf-endpoints-documentation/main/assets/1_security.png" alt="define security" />
+<img src="https://raw.githubusercontent.com/huggingface/hf-endpoints-documentation/main/assets/1_create_cost.png" alt="create endpoint" />
+<img src="https://raw.githubusercontent.com/huggingface/hf-endpoints-documentation/main/assets/overview.png" alt="overview" />
+<img src="https://raw.githubusercontent.com/huggingface/hf-endpoints-documentation/main/assets/1_inference.png" alt="run inference" />
+
+References:
+[1. DC] Create an Endpoint
+[2. KG] Hugging Face, organization
+[3. KG] Endpoint creation page, category
+</details>
 
 ## Results
 
