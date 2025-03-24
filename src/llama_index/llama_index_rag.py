@@ -1,11 +1,12 @@
 from llama_index.core import Settings
 from llama_index.core import StorageContext, load_index_from_storage
+from src.llama_index.models import llms, embedding_models
 
 
 class LlamaIndexRag:
-    def __init__(self, index_dirpath, llm, embed_model):
-        Settings.llm = llm
-        Settings.embed_model = embed_model
+    def __init__(self, index_dirpath, llm_name, embed_model_name):
+        Settings.llm = llms[llm_name]
+        Settings.embed_model = embedding_models[embed_model_name]
 
         index = load_index_from_storage(
             StorageContext.from_defaults(persist_dir=index_dirpath)

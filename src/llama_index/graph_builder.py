@@ -1,14 +1,14 @@
 from llama_index.core import PropertyGraphIndex
 from llama_index.core.indices.property_graph import SimpleLLMPathExtractor
 from llama_index.core import Document
-from src.llama_index.models import llm as base_llm, embed_model as base_embed_model
+from src.llama_index.models import get_llm, get_embedding_model
         
 
 class LlamaIndexGraphBuilder:
 
-    def __init__(self, index_dirpath, llm=base_llm, embed_model=base_embed_model):
-        self.llm = llm
-        self.embed_model = embed_model
+    def __init__(self, index_dirpath, llm_name, embed_model_name):
+        self.llm = get_llm(llm_name)
+        self.embed_model = get_embedding_model(embed_model_name)
         self.index_dirpath = index_dirpath
 
     def build(self, ds):

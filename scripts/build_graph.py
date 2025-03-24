@@ -9,7 +9,7 @@ from src.llama_index.graph_builder import LlamaIndexGraphBuilder
 from src.lightrag.rag import LightRag
 
 parser = argparse.ArgumentParser(description='Build a property graph index.')
-parser.add_argument('--config', type=str, required=True, help='Path to the config file.')
+parser.add_argument('config', type=str, help='Path to the config file.')
 args = parser.parse_args()
 
 
@@ -20,15 +20,15 @@ if __name__ == "__main__":
     
     with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
-    index_dirpath = Path(config['index_dirpath'])
-    dataset_dirpath = Path(config['dataset_dirpath'])
+    index_dirpath = config['index_dirpath']
+    dataset_path = config['dataset_path']
     framework = config['framework']
 
-    ds = datasets.load_dataset(dataset_dirpath, split="train").select(range(8))
+    ds = datasets.load_dataset(dataset_path, split="train").select(range(8))
 
     t = time.time()
     if framework == 'llama_index':
-        LlamaIndexGraphBuilder(index_dirpath).build(ds)
+        LlamaIndexGraphBuilder(index_dirpath, config["llm"], config["embedding_model"]).build(ds)
     elif framework == 'lightrag':
         LightRag(index_dirpath).build(ds)
     else:

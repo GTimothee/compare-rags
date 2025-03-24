@@ -1,5 +1,17 @@
-llama-index
+llama-index>=0.12.23
 llama-index-llms-openai-like 
 llama-index-embeddings-openai
+llama-index-embeddings-huggingface>=0.5.2
+llama-index-llms-mistralai>=0.4.0
+llama-index-llms-langchain
+lama-index-embeddings-langchain
 
 lightrag-hku
+pimaster
+
+neo4j-graphrag[mistralai]>=1.4.0
+neo4j>=5.28.1
+
+python-dotenv>=1.0.1
+langchain-openai
+transformers>=4.49.0

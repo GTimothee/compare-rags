@@ -33,7 +33,7 @@ if __name__ == "__main__":
     framework = config['framework']
 
     if framework == "llama_index":
-        rag_engine = LlamaIndexRag(index_dirpath, llm, embed_model)
+        rag_engine = LlamaIndexRag(index_dirpath, config['llm'], config['embedding_model'])
     elif framework == "lightrag":
         rag_engine = LightRag(index_dirpath)
     else: 

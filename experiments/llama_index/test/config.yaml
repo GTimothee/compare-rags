@@ -1,0 +1,9 @@
+---
+framework: "llama_index"
+description: "test installation"  # description of the experiment
+dataset_path: "m-ric/huggingface_doc"  # path to source dataset on huggingface hub
+index_dirpath: "data/llama_index/"  # where to save the index on disk
+n_samples: 1  # number of documents from dataset to process
+output_dir: "experiments/llama_index/test"  # where to save the experiment outputs
+llm: "mistral"
+embedding_model: "huggingface-sentence-transformers"
