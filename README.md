@@ -111,6 +111,7 @@ Frameworks usage:
 - lightRAG
    - Documentation is raw and sparse
    - By default it is retrieving LOTS of data to answer a query
+   - Nice that they add source citation by default
 - llama-index
    - Documentation is good
    - API is nice, providing a good balance between abstraction and customization
