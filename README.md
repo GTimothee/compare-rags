@@ -114,7 +114,8 @@ Frameworks usage:
 - llama-index
    - Documentation is good
    - API is nice, providing a good balance between abstraction and customization
-   - Sad that we are forced to use a graphDB to be able to do vector search for graphRAG. I am wondering how lightRAG does, as it seems to be using vector search without it.
+   - I appreciate the fact that we can easily see what we are doing and customize. It is very lightweight.
+   - Sad that we are forced to use a graphDB to be able to do vector search for graphRAG. I am wondering how lightRAG does, as it seems to be using vector search without it. Apparently it is possible to use a standard vector DB to store the nodes and use a separate graphDB for the graph search part, but it will take a bit of time (which I don't have). 
 
 ## Source datasets
 
