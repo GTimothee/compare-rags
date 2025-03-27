@@ -92,7 +92,7 @@ References:
 On the ["huggingface 10 docs"](https://huggingface.co/datasets/GTimothee/huggingface_doc_qa_10_docs) evaluation dataset:
 
 | Framework | Config | Version description |Normalized accuracy |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | llama-index | Out-of-the-box | Does not use embeddings (default behaviour without using a graphDB) | 74.7% |
 | lightrag | Out-of-the-box | / | 81% |
 
