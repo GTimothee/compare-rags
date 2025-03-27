@@ -2,14 +2,21 @@
 
 // Work in progress
 
-Working with RAG, I was wondering what was the faster way to setup a light graphRAG, which framework to use and which of the main frameworks was the best. 
+## Introduction
 
-The goal of this repo is to compare the inner workings and overall performance of:
-- Llama-index
-- LightRAG
-- Neo4j-graphrag
+Objectives of the repo:
+- Compare python RAG frameworks
+   - which one is the simplest to setup and use? 
+   - which one gives the best results without too much tuning? 
+   - what is the best performance I can expect with a given framework? What is the optimal configuration? 
+   - How far in complexity can we go? For example can we add some graphML on top of our knowledge graph? Is it simple or complicated to setup? Is the performance gain worth the effort? 
+- Learn the inner workings of graph RAG
+   - Having implemented my own graphRAG solution with Noe4j python, I am also curious of how each solution has been implemented, and how they found solutions to the problems I faced.
 
-Having implemented my own graphRAG solution with Noe4j python, I am also curious of how each solution has been implemented, and how they found solutions to many problems I faced.
+Frameworks to test:
+- [x] Llama-index
+- [x] LightRAG
+- [ ] Neo4j-graphrag
 
 ## How the study is designed
 
