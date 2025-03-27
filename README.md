@@ -1,11 +1,11 @@
-# RAG comparative study
+# Graph RAG comparative study
 
 // Work in progress
 
 ## Introduction
 
 Objectives of the repo:
-- Compare python RAG frameworks
+- Compare python graph RAG frameworks
    - which one is the simplest to setup and use? 
    - which one gives the best results without too much tuning? 
    - what is the best performance I can expect with a given framework? What is the optimal configuration? 
