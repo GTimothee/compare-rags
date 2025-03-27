@@ -13,8 +13,10 @@ from dotenv import load_dotenv
 import yaml
 import argparse
 
+from src.configuration import load_config
 from src.lightrag.rag import LightRag
 from src.llama_index.llama_index_rag import LlamaIndexRag
+import time
 
 parser = argparse.ArgumentParser(description="Run rag with a question.")
 parser.add_argument('config', type=str, help='Path to the config file.')
@@ -26,21 +28,19 @@ load_dotenv()
 
 
 if __name__ == "__main__":
-
-    with open(args.config, 'r') as file:
-        config = yaml.safe_load(file)
-    index_dirpath = config['index_dirpath']
-    framework = config['framework']
-
-    if framework == "llama_index":
-        rag_engine = LlamaIndexRag(index_dirpath, config['llm'], config['embedding_model'])
-    elif framework == "lightrag":
-        rag_engine = LightRag(index_dirpath)
+    config = load_config(args.config)
+    if config.framework == "llama_index":
+        rag_engine = LlamaIndexRag(config.index_dirpath, config.llm, config.embedding_model)
+    elif config.framework == "lightrag":
+        rag_engine = LightRag(config.index_dirpath)
     else: 
-        raise NotImplementedError(f"Unsupported framework: {framework}")
+        raise NotImplementedError(f"Unsupported framework: {config.framework}")
 
     print(f"Question: {args.question}")
+    start_time = time.time()
     response = rag_engine.run(args.question)
-    print(f"Answer: {response['text']}")
+    end_time = time.time()
+    print(f"Time taken: {end_time - start_time} seconds")
+    print(f"Answer: {response.text}")
     if args.verbose:
-        print(f"Context: {response['context']}")
+        print(f"Context: {response.context}")
