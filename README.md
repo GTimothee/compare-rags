@@ -13,6 +13,10 @@ Objectives of the repo:
 - Learn the inner workings of graph RAG
    - Having implemented my own graphRAG solution with Noe4j python, I am also curious of how each solution has been implemented, and how they found solutions to the problems I faced.
 
+What it gives you:
+- An exemple of how to use each framework
+- A comparative study to help you choose the best framework for your needs
+
 Frameworks to test:
 - [x] Llama-index
 - [x] LightRAG
@@ -102,6 +106,15 @@ On the ["huggingface 10 docs"](https://huggingface.co/datasets/GTimothee/hugging
 | --- | --- | --- | --- |
 | llama-index | Out-of-the-box | Does not use embeddings (default behaviour without using a graphDB) | 74.7% |
 | lightrag | Out-of-the-box | / | 81% |
+
+Frameworks usage: 
+- lightRAG
+   - Documentation is raw and sparse
+   - By default it is retrieving LOTS of data to answer a query
+- llama-index
+   - Documentation is good
+   - API is nice, providing a good balance between abstraction and customization
+   - Sad that we are forced to use a graphDB to be able to do vector search for graphRAG. I am wondering how lightRAG does, as it seems to be using vector search without it.
 
 ## Source datasets
 
