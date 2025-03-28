@@ -15,16 +15,16 @@ from transformers import AutoModelForCausalLM
 
 
 def get_llm(llm_name: str):
-    if llm_name == "huggingface-api":
-        model_name = "HuggingFaceH4/zephyr-7b-alpha"
+    if llm_name.startswith("huggingface-api"):
+        _, model_name = llm_name.split("_")
         set_global_tokenizer(
             AutoTokenizer.from_pretrained(model_name).encode
         )
         return HuggingFaceInferenceAPI(
             model_name=model_name, token=os.getenv('HF_TOKEN')
         )
-    elif llm_name == "huggingface":
-        model_name= "mistralai/Mixtral-8x7B-Instruct-v0.1"
+    elif llm_name.startswith("huggingface"):
+        _, model_name = llm_name.split("_")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
         return HuggingFaceLLM(model=model, tokenizer=tokenizer)
