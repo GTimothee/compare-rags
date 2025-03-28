@@ -14,5 +14,6 @@ neo4j
 
 python-dotenv
 langchain-openai
-transformers
+transformers[torch]
+huggingface_hub[inference]
 future

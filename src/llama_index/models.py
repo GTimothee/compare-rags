@@ -7,10 +7,28 @@ from llama_index.llms.openai_like import OpenAILike
 from llama_index.embeddings.langchain import LangchainEmbedding
 from llama_index.llms.mistralai  import MistralAI
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.llms.huggingface import HuggingFaceLLM
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
+from llama_index.core import set_global_tokenizer
+from transformers import AutoTokenizer
 
 
 def get_llm(llm_name: str):
-    if llm_name == "openai-like":
+    if llm_name == "huggingface-api":
+        model_name = "HuggingFaceH4/zephyr-7b-alpha"
+        set_global_tokenizer(
+            AutoTokenizer.from_pretrained(model_name).encode
+        )
+        return HuggingFaceInferenceAPI(
+            model_name=model_name, token=os.getenv('HF_TOKEN')
+        )
+    elif llm_name == "huggingface":
+        model_name= "mistralai/Mixtral-8x7B-Instruct-v0.1"
+        set_global_tokenizer(
+            AutoTokenizer.from_pretrained(model_name).encode
+        )
+        return HuggingFaceLLM(model=model_name)
+    elif llm_name == "openai-like":
         return OpenAILike(
             model="Llama-3-70B-Instruct", 
             is_chat_model=True, 
