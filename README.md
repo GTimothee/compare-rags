@@ -2,6 +2,9 @@
 
 // Work in progress
 
+No time to read the doc ? 
+   You can already open the ```run_experiments.ipynb``` notebook in google colab and use the package with local LLM and embedding models!
+
 ## Introduction
 
 Objectives of the repo:
