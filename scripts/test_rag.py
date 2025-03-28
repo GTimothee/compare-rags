@@ -41,6 +41,6 @@ if __name__ == "__main__":
     response = rag_engine.run(args.question)
     end_time = time.time()
     print(f"Time taken: {end_time - start_time} seconds")
-    print(f"Answer: {response.text}")
+    print(f"Answer: {response['text']}")
     if args.verbose:
-        print(f"Context: {response.context}")
+        print(f"Context: {response['context']}")

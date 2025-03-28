@@ -19,7 +19,7 @@ load_dotenv()
 
 if __name__ == "__main__":
     config = load_config(args.config)
-    ds = datasets.load_dataset(config.dataset_path, split="train").select(range(8))
+    ds = datasets.load_dataset(config.dataset_path, split="train").select(range(config.n_samples))
 
     t = time.time()
     if config.framework == 'llama_index':
