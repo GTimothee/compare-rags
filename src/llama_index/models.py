@@ -11,6 +11,7 @@ from llama_index.llms.huggingface import HuggingFaceLLM
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.core import set_global_tokenizer
 from transformers import AutoTokenizer
+from transformers import AutoModelForCausalLM
 
 
 def get_llm(llm_name: str):
@@ -24,10 +25,9 @@ def get_llm(llm_name: str):
         )
     elif llm_name == "huggingface":
         model_name= "mistralai/Mixtral-8x7B-Instruct-v0.1"
-        set_global_tokenizer(
-            AutoTokenizer.from_pretrained(model_name).encode
-        )
-        return HuggingFaceLLM(model=model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+        return HuggingFaceLLM(model=model, tokenizer=tokenizer)
     elif llm_name == "openai-like":
         return OpenAILike(
             model="Llama-3-70B-Instruct", 
