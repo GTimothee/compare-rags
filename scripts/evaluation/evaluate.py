@@ -16,6 +16,7 @@ from transformers import pipeline
 import json
 import yaml
 
+from src.configuration import load_config
 from src.lightrag.rag import LightRag
 from src.llama_index.llama_index_rag import LlamaIndexRag
 
@@ -86,28 +87,25 @@ def get_llm(llm_name: str):
 
 if __name__ == "__main__":
     
-    with open(args.config_path, 'r') as file:
-        config = yaml.safe_load(file)
-    framework = config['framework']
-    index_dirpath = config['index_dirpath']
+    config = load_config(args.config)
 
     logging.basicConfig(
-        filename=f"{config['framework']}_evaluation.log",
+        filename=f"{config.framework}_evaluation.log",
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO
     )
 
-    ds = load_dataset(config['eval_dataset_path'])['train']
+    ds = load_dataset(config.eval_dataset_path)['train']
 
-    if framework == "llama_index":
+    if config.framework == "llama_index":
         rag_engine = LlamaIndexRag(config)
-    elif framework == "lightrag":
-        rag_engine = LightRag(index_dirpath)
+    elif config.framework == "lightrag":
+        rag_engine = LightRag(config.index_dirpath)
     else: 
-        raise NotImplementedError(f"Unsupported framework: {framework}")
+        raise NotImplementedError(f"Unsupported framework: {config.framework}")
 
-    critique_llm = get_llm(config['llm'])
+    critique_llm = get_llm(config.llm)
 
     critique_chain = ChatPromptTemplate.from_messages(
         [
@@ -164,6 +162,6 @@ if __name__ == "__main__":
         })
 
     print('Saving results...')
-    output_path = os.path.join(config['output_dir'], 'eval.json')
+    output_path = os.path.join(config.output_dir, 'eval.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=4)
