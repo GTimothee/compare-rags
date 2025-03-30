@@ -22,7 +22,7 @@ from src.llama_index.llama_index_rag import LlamaIndexRag
 
 
 parser = argparse.ArgumentParser(description='Evaluate a Q/A system using llm as judge.')
-parser.add_argument('config_path', type=str, help='The path to the configuration YAML file.')
+parser.add_argument('config', type=str, help='The path to the configuration YAML file.')
 args = parser.parse_args()
 
 load_dotenv()
