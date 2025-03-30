@@ -1,18 +1,39 @@
+import os
 from llama_index.core import Settings
 from llama_index.core import StorageContext, load_index_from_storage
+from llama_index.core import PropertyGraphIndex
+from llama_index.graph_stores.neo4j import Neo4jPropertyGraphStore
+from src.configuration import Config
 from src.llama_index.models import get_llm, get_embedding_model
 
 
 class LlamaIndexRag:
-    def __init__(self, index_dirpath, llm_name, embed_model_name):
-        Settings.llm = get_llm(llm_name)
-        Settings.embed_model = get_embedding_model(embed_model_name)
+    def __init__(self, config: Config):
+        Settings.llm = get_llm(config.llm)
+        Settings.embed_model = get_embedding_model(config.embedding_model)
 
-        index = load_index_from_storage(
-            StorageContext.from_defaults(persist_dir=index_dirpath)
-        )
+        if config.graph_store == 'neo4j':
+            graph_store = Neo4jPropertyGraphStore(
+                username=os.getenv('NEO4J_USERNAME'),
+                password=os.getenv('NEO4J_PASSWORD'),
+                url=os.getenv('NEO4J_URL'),
+                database=os.getenv('NEO4J_DATABASE'),
+            )
+            index = PropertyGraphIndex.from_existing(
+                property_graph_store=graph_store,
+                # vector_store=vector_store,
+                embed_kg_nodes=True,
+            )
+        else:
+            index = load_index_from_storage(
+                StorageContext.from_defaults(persist_dir=config.index_dirpath)
+            )
+
         self.query_engine = index.as_query_engine(
-            # include_text=True
+            include_text=True,  # Whether to include source-text in the retriever results.
+            # you can add more kwargs relative to the retrievers you use
+            # To customize synonym retriever, see also https://github.com/run-llama/llama_index/blob/main/llama-index-core/llama_index/core/indices/property_graph/sub_retrievers/llm_synonym.py#L30
+            # To customize vector retriever, see also https://github.com/run-llama/llama_index/blob/main/llama-index-core/llama_index/core/indices/property_graph/sub_retrievers/vector.py#L22
         ) 
 
     def run(self, question: str):

@@ -52,10 +52,12 @@ class LlamaIndexGraphBuilder:
             max_triplets_per_chunk=20, # the default
             include_embeddings=include_embeddings,
             property_graph_store=self.graph_store,
+            embed_kg_nodes=True
         )
         
-        print('Saving the index to disk...')
-        index.storage_context.persist(persist_dir=str(self.index_dirpath))
+        if isinstance(self.graph_store, SimplePropertyGraphStore):
+            print('Saving the index to disk...')
+            index.storage_context.persist(persist_dir=str(self.index_dirpath))
 
     def _default_version(self):
         kg_extractors = [SimpleLLMPathExtractor(llm=self.llm)]

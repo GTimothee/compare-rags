@@ -30,7 +30,7 @@ load_dotenv()
 if __name__ == "__main__":
     config = load_config(args.config)
     if config.framework == "llama_index":
-        rag_engine = LlamaIndexRag(config.index_dirpath, config.llm, config.embedding_model)
+        rag_engine = LlamaIndexRag(config)
     elif config.framework == "lightrag":
         rag_engine = LightRag(config.index_dirpath)
     else: 
