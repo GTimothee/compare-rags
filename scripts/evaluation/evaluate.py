@@ -114,7 +114,7 @@ if __name__ == "__main__":
                 "system",
                 evaluation_prompt,
             ),
-            ("placeholder", "{messages}"),
+            ("user", "{user_message}"),
         ]
     ) | critique_llm | JsonOutputParser()
 
@@ -140,9 +140,9 @@ if __name__ == "__main__":
 
         try:
             logging.info("- Running critique chain...")
-            critique = critique_chain.invoke(
-                (
-                    {"messages": [HumanMessage(content=f"Question:{sample['question']}\nExpected Answer:{sample['answer']}\nSystem's response:```{rag_answer}```")]})
+            critique = critique_chain.invoke({
+                    "user_message": f"Question:{sample['question']}\nExpected Answer:{sample['answer']}\nSystem's response:```{rag_answer}```"
+                }
             )
             logging.info(f"- Critique: {critique}")
             sample['rag_score'] = critique['evaluation']['score']

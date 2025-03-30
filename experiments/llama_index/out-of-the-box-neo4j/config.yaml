@@ -1,0 +1,11 @@
+dataset_path: m-ric/huggingface_doc
+description: Out of the box config + use neo4j to enable embeddings + switch llm to a 7B model
+embedding_model: huggingface-sentence-transformers
+eval_dataset_path: GTimothee/huggingface_doc_qa_10_docs
+framework: llama_index
+graph_store: neo4j
+index_dirpath: data/llama_index/
+llm: huggingface_TheBloke/Mistral-7B-Instruct-v0.2-AWQ
+n_samples: 8
+output_dir: experiments/llama_index/out-of-the-box-neo4j
+version: out-of-the-box-neo4j

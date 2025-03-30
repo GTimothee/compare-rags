@@ -1,19 +1,39 @@
+# llama-index dependencies
 llama-index
-llama-index-llms-openai-like 
-llama-index-embeddings-openai
-llama-index-embeddings-huggingface
+
+# llama-index llms
 llama-index-llms-mistralai
 llama-index-llms-langchain
-lama-index-embeddings-langchain
+llama-index-llms-openai
+llama-index-llms-openai-like
+llama-index-llms-huggingface
+llama-index-llms-huggingface-api
 
-lightrag-hku
-pimaster
+# llama-index embeddings
+llama-index-embeddings-openai
+llama-index-embeddings-huggingface
+llama-index-embeddings-langchain
 
-neo4j-graphrag[mistralai]
-neo4j
+# llama-index graph stores
+llama-index-graph-stores-neo4j
 
-python-dotenv
 langchain-openai
-transformers[torch]
+
+# using huggingface llms
+langchain-huggingface
 huggingface_hub[inference]
+transformers[torch]
+autoawq
+
+# lightrag dependencies
+lightrag-hku
+pipmaster
 future
+
+# neo4j dependencies
+neo4j
+neo4j-graphrag[mistralai]
+
+# repo dependencies
+python-dotenv
+datasets

@@ -103,14 +103,17 @@ References:
 
 ## Results
 
+### huggingface 10 docs evaluation
+
 On the ["huggingface 10 docs"](https://huggingface.co/datasets/GTimothee/huggingface_doc_qa_10_docs) evaluation dataset:
 
-| Framework | Config | Version description |Normalized accuracy |
+| Framework | Config | Version description | LLM | Normalized accuracy |
 | --- | --- | --- | --- |
-| llama-index | Out-of-the-box | Does not use embeddings (default behaviour without using a graphDB) | 74.7% |
-| lightrag | Out-of-the-box | / | 81% |
+| llama-index | experiments/llama_index/out-of-the-box | Llama-3-70B-Instruct | Does not use embeddings (default behaviour without using a graphDB) | 74.7% |
+| llama-index | experiments/llama_index/out-of-the-box-neo4j | Mistral 7B Instruct Quantized 4 bit (AWQ) | Out of the box config + use neo4j to enable embeddings + switch llm to a 7B model | % |
+| lightrag | experiments/lightrag/out-of-the-box | Llama-3-70B-Instruct | Default configuration, with embeddings | 81% |
 
-Frameworks usage: 
+### Frameworks usage: 
 - lightRAG
    - Documentation is raw and sparse
    - By default it is retrieving LOTS of data to answer a query
