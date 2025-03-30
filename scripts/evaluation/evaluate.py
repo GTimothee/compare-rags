@@ -11,6 +11,7 @@ from langchain_core.messages import HumanMessage
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
 from langchain_huggingface import ChatHuggingFace
+from langchain_huggingface import HuggingFacePipeline
 import argparse
 from transformers import pipeline
 import json
@@ -62,13 +63,13 @@ def get_llm(llm_name: str):
         _, model_name = llm_name.split("_")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda")
-        pipe = pipeline(
+        pipe = HuggingFacePipeline(pipeline=pipeline(
             "text-generation",
             model=model,
             tokenizer=tokenizer,
             do_sample=True,
             temperature=0.,
-        )
+        ))
         return ChatHuggingFace(llm=pipe)
     
     elif llm_name == "openai-like":
