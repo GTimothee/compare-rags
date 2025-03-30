@@ -114,7 +114,7 @@ if __name__ == "__main__":
                 "system",
                 evaluation_prompt,
             ),
-            ("user", "{user_message}"),
+            ("human", "{user_message}"),
         ]
     ) | critique_llm | JsonOutputParser()
 
