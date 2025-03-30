@@ -69,7 +69,7 @@ def get_llm(llm_name: str):
             do_sample=True,
             temperature=0.,
         )
-        return ChatHuggingFace(pipe)
+        return ChatHuggingFace(llm=pipe)
     
     elif llm_name == "openai-like":
         return ChatOpenAI(
