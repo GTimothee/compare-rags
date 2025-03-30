@@ -8,7 +8,11 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.messages import HumanMessage
+from transformers import AutoTokenizer
+from transformers import AutoModelForCausalLM
+from langchain_huggingface import ChatHuggingFace
 import argparse
+from transformers import pipeline
 import json
 import yaml
 
@@ -51,6 +55,34 @@ Output Format (JSON only):
 Do not include any additional text—only the JSON object. Any extra content will result in a grade of 0."""
 
 
+def get_llm(llm_name: str):
+
+    if llm_name.startswith("huggingface"):
+        _, model_name = llm_name.split("_")
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda")
+        pipe = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+            do_sample=True,
+            temperature=0.,
+        )
+        return ChatHuggingFace(pipe)
+    
+    elif llm_name == "openai-like":
+        return ChatOpenAI(
+            openai_api_base=os.getenv("OPENAI_BASE_URL"),
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            timeout=60,
+            request_timeout=60,
+            model_name="Llama-3-70B-Instruct",
+            temperature=0.0,
+        )
+    
+    else:
+        raise NotImplementedError(f"Unsupported llm: {llm_name}")
+
 
 if __name__ == "__main__":
     
@@ -69,20 +101,13 @@ if __name__ == "__main__":
     ds = load_dataset(config['eval_dataset_path'])['train']
 
     if framework == "llama_index":
-        rag_engine = LlamaIndexRag(index_dirpath, config['llm'], config['embedding_model'])
+        rag_engine = LlamaIndexRag(config)
     elif framework == "lightrag":
         rag_engine = LightRag(index_dirpath)
     else: 
         raise NotImplementedError(f"Unsupported framework: {framework}")
 
-    llm = ChatOpenAI(
-        openai_api_base=os.getenv("OPENAI_BASE_URL"),
-        openai_api_key=os.getenv("OPENAI_API_KEY"),
-        timeout=60,
-        request_timeout=60,
-        model_name="Llama-3-70B-Instruct",
-        temperature=0.0,
-    )
+    critique_llm = get_llm(config['llm'])
 
     critique_chain = ChatPromptTemplate.from_messages(
         [
@@ -92,7 +117,7 @@ if __name__ == "__main__":
             ),
             ("placeholder", "{messages}"),
         ]
-    ) | llm | JsonOutputParser()
+    ) | critique_llm | JsonOutputParser()
 
     results = []
 
