@@ -7,11 +7,8 @@ import os
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.messages import HumanMessage
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
-from langchain_huggingface import ChatHuggingFace
-from langchain_huggingface import HuggingFacePipeline
 import argparse
 from transformers import pipeline
 import json
@@ -57,33 +54,50 @@ Output Format (JSON only):
 Do not include any additional text—only the JSON object. Any extra content will result in a grade of 0."""
 
 
-def get_llm(llm_name: str):
-
-    if llm_name.startswith("huggingface"):
-        _, model_name = llm_name.split("_")
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda")
-        pipe = HuggingFacePipeline(pipeline=pipeline(
+class HuggingfaceEvaluator:
+    def __init__(self, model_name: str = "casperhansen/llama-3-8b-instruct-awq", device_map: str = "cuda"):
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map=device_map)
+        self.pipe = pipeline(
             "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            do_sample=True,
-            temperature=0.,
-        ))
-        return ChatHuggingFace(llm=pipe)
-    
-    elif llm_name == "openai-like":
-        return ChatOpenAI(
+            model=self.model,
+            tokenizer=self.tokenizer,
+        )
+
+    def evaluate(self, user_message: str):
+        messages = [
+            {"role": "system", "content": evaluation_prompt},
+            {"role": "user", "content": user_message},
+        ]
+        formatted_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        return self.pipe(formatted_prompt, max_new_tokens=1000)[0]['generated_text']
+
+
+class OpenAILikeEvaluator:
+    def __init__(self, model_name: str = "Llama-3-70B-Instruct", device_map: str = "cuda"):
+        self.llm = ChatOpenAI(
             openai_api_base=os.getenv("OPENAI_BASE_URL"),
             openai_api_key=os.getenv("OPENAI_API_KEY"),
             timeout=60,
             request_timeout=60,
-            model_name="Llama-3-70B-Instruct",
+            model_name=model_name,
             temperature=0.0,
         )
-    
-    else:
-        raise NotImplementedError(f"Unsupported llm: {llm_name}")
+        self.critique_chain = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    evaluation_prompt,
+                ),
+                ("human", "{user_message}"),
+            ]
+        ) | self.llm | JsonOutputParser()
+
+    def evaluate(self, user_message: str):
+        return self.critique_chain.invoke({
+                "user_message": user_message
+            }
+        )
 
 
 if __name__ == "__main__":
@@ -99,6 +113,7 @@ if __name__ == "__main__":
 
     ds = load_dataset(config.eval_dataset_path)['train']
 
+    # Load RAG engine
     if config.framework == "llama_index":
         rag_engine = LlamaIndexRag(config)
     elif config.framework == "lightrag":
@@ -106,20 +121,19 @@ if __name__ == "__main__":
     else: 
         raise NotImplementedError(f"Unsupported framework: {config.framework}")
 
-    critique_llm = get_llm(config.llm)
+    # Load evaluator
+    if config.llm.startswith("huggingface"):
+        llm_name = config.llm.split("_")[-1]
+        logging.info(f"Loading OpenAI-like evaluator with model {llm_name}...")
+        evaluator = HuggingfaceEvaluator(model_name=llm_name)
+    elif config.llm == "openai-like":
+        logging.info(f"Loading OpenAI-like evaluator with model {config.llm}...")
+        evaluator = OpenAILikeEvaluator(model_name=config.llm)
+    else:
+        raise NotImplementedError(f"Unsupported LLM: {config.llm}")
 
-    critique_chain = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                evaluation_prompt,
-            ),
-            ("human", "{user_message}"),
-        ]
-    ) | critique_llm | JsonOutputParser()
-
+    # Evaluation loop
     results = []
-
     for sample_idx, sample in tqdm(enumerate(ds), total=len(ds), desc="RAG evaluation running..."):
         logging.info(f"Processing sample {sample_idx}...")
 
@@ -140,10 +154,7 @@ if __name__ == "__main__":
 
         try:
             logging.info("- Running critique chain...")
-            critique = critique_chain.invoke({
-                    "user_message": f"Question:{sample['question']}\nExpected Answer:{sample['answer']}\nSystem's response:```{rag_answer}```"
-                }
-            )
+            critique = evaluator.evaluate(f"Question:{sample['question']}\nExpected Answer:{sample['answer']}\nSystem's response:```{rag_answer}```")
             logging.info(f"- Critique: {critique}")
             sample['rag_score'] = critique['evaluation']['score']
             sample['rag_feedback'] = critique['evaluation']['feedback']
