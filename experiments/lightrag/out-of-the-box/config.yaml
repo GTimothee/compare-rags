@@ -2,6 +2,8 @@
 # experiment
 framework: "lightrag"
 description: "baseline lightrag configuration"  # description of the experiment
+llm: "openai-like"
+eval_llm: "openai-like"
 
 # datasets
 dataset_path: "m-ric/huggingface_doc"  # path to source dataset on huggingface hub

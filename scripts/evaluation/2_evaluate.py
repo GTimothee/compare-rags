@@ -33,15 +33,15 @@ if __name__ == "__main__":
         samples = json.load(f)
 
     # Load evaluator
-    if config.llm.startswith("huggingface"):
-        llm_name = config.llm.split("_")[-1]
+    if config.eval_llm.startswith("huggingface"):
+        llm_name = config.eval_llm.split("_")[-1]
         logging.info(f"Loading OpenAI-like evaluator with model {llm_name}...")
         evaluator = HuggingfaceEvaluator(model_name=llm_name)
-    elif config.llm == "openai-like":
-        logging.info(f"Loading OpenAI-like evaluator with model {config.llm}...")
-        evaluator = OpenAILikeEvaluator(model_name=config.llm)
+    elif config.eval_llm == "openai-like":
+        logging.info(f"Loading OpenAI-like evaluator with model {config.eval_llm}...")
+        evaluator = OpenAILikeEvaluator(model_name=config.eval_llm)
     else:
-        raise NotImplementedError(f"Unsupported LLM: {config.llm}")
+        raise NotImplementedError(f"Unsupported LLM: {config.eval_llm}")
 
     # Evaluation loop
     results = []
@@ -62,6 +62,6 @@ if __name__ == "__main__":
         results.append(sample)
 
     print('Saving results...')
-    output_path = os.path.join(config.output_dir, f'eval_{config.llm}.json')
+    output_path = os.path.join(config.output_dir, f'eval_{config.eval_llm}.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=4)

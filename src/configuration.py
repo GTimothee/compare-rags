@@ -11,6 +11,7 @@ class Config(BaseModel):
     n_samples: int = Field(default=1)
     output_dir: str
     llm: str
+    eval_llm: str
     embedding_model: str
     version: str
     graph_store: str = Field(default=None)
