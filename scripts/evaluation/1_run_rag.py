@@ -14,6 +14,7 @@ from src.llama_index.llama_index_rag import LlamaIndexRag
 
 parser = argparse.ArgumentParser(description='Evaluate a Q/A system using llm as judge.')
 parser.add_argument('config', type=str, help='The path to the configuration YAML file.')
+parser.add_argument('--limit', type=int, default=-1)
 args = parser.parse_args()
 
 load_dotenv()
@@ -43,6 +44,9 @@ if __name__ == "__main__":
     # Generation loop
     results = []
     for sample_idx, sample in tqdm(enumerate(ds), total=len(ds), desc=f"RAG running on dataset {config.eval_dataset_path}..."):
+        if sample_idx == args.limit:
+            logging.info(f"Limit of {args.limit} samples reached. Stopping evaluation.")
+            break
         logging.info(f"Processing sample {sample_idx}...")
 
         try:
