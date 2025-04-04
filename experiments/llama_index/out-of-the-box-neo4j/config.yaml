@@ -2,7 +2,7 @@ dataset_path: m-ric/huggingface_doc
 description: Out of the box config + use neo4j to enable embeddings + switch llm to a 7B model
 embedding_model: huggingface-sentence-transformers
 eval_dataset_path: GTimothee/huggingface_doc_qa_10_docs
-eval_llm: casperhansen/llama-3-8b-instruct-awq
+eval_llm: huggingface_casperhansen/llama-3-8b-instruct-awq
 framework: llama_index
 graph_store: neo4j
 index_dirpath: data/llama_index/
