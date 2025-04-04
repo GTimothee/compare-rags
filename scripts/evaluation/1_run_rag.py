@@ -25,7 +25,7 @@ if __name__ == "__main__":
     config = load_config(args.config)
 
     logging.basicConfig(
-        filename=f"{config.framework}_evaluation.log",
+        filename=f"{config.framework}_answers.log",
         filemode='w',
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     results = []
     for sample_idx, sample in tqdm(enumerate(ds), total=len(ds), desc=f"RAG running on dataset {config.eval_dataset_path}..."):
         if sample_idx == args.limit:
-            logging.info(f"Limit of {args.limit} samples reached. Stopping evaluation.")
+            logging.info(f"Limit of {args.limit} samples reached. Stopping generation.")
             break
         logging.info(f"Processing sample {sample_idx}...")
 
