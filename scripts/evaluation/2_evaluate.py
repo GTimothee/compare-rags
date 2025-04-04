@@ -48,16 +48,16 @@ if __name__ == "__main__":
     for sample_idx, sample in tqdm(enumerate(samples), total=len(samples), desc="RAG evaluation running..."):
         logging.info(f"Processing sample {sample_idx}...")
 
-        try:
-            logging.info("- Running critique chain...")
-            critique = evaluator.evaluate(f"Question:{sample['question']}\nExpected Answer:{sample['answer']}\nSystem's response:```{sample['rag_answer']}```")
-            logging.info(f"- Critique: {critique}")
-            sample['rag_score'] = critique['evaluation']['score']
-            sample['rag_feedback'] = critique['evaluation']['feedback']
-        except Exception as e:
-            logging.error(f"Error during evaluation of sample {sample_idx}: {e}")
-            sample['rag_score'] = None
-            sample['rag_feedback'] = None
+        # try:
+        logging.info("- Running critique chain...")
+        critique = evaluator.evaluate(f"Question:{sample['question']}\nExpected Answer:{sample['answer']}\nSystem's response:```{sample['rag_answer']}```")
+        logging.info(f"- Critique: {critique}")
+        sample['rag_score'] = critique['evaluation']['score']
+        sample['rag_feedback'] = critique['evaluation']['feedback']
+        # except Exception as e:
+        #     logging.error(f"Error during evaluation of sample {sample_idx}: {e}")
+        #     sample['rag_score'] = None
+        #     sample['rag_feedback'] = None
         
         results.append(sample)
 
