@@ -9,8 +9,8 @@ from src.llama_index.models import get_llm, get_embedding_model
 
 class LlamaIndexRag:
     def __init__(self, config: Config):
-        llm = get_llm(config.llm)
-        embed_model = get_embedding_model(config.embedding_model)
+        Settings.llm = get_llm(config.llm)
+        Settings.embed_model = get_embedding_model(config.embedding_model)
 
         if config.graph_store == 'neo4j':
             graph_store = Neo4jPropertyGraphStore(
@@ -30,8 +30,6 @@ class LlamaIndexRag:
             )
 
         self.query_engine = index.as_query_engine(
-            llm=llm,
-            embed_model=embed_model,
             include_text=True,  # Whether to include source-text in the retriever results.
             # you can add more kwargs relative to the retrievers you use
             # To customize synonym retriever, see also https://github.com/run-llama/llama_index/blob/main/llama-index-core/llama_index/core/indices/property_graph/sub_retrievers/llm_synonym.py#L30
