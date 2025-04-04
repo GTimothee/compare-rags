@@ -22,7 +22,7 @@ langchain-openai
 # using huggingface llms
 langchain-huggingface
 huggingface_hub[inference]
-transformers[torch]
+transformers[torch]==4.45.0
 autoawq
 
 # lightrag dependencies

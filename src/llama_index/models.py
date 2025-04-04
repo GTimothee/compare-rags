@@ -25,6 +25,7 @@ def get_llm(llm_name: str):
         )
     elif llm_name.startswith("huggingface"):
         _, model_name = llm_name.split("_")
+        print(f"Loading HuggingFace llm model {model_name}...")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cuda")
         return HuggingFaceLLM(model=model, tokenizer=tokenizer)
