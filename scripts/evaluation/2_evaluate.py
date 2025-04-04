@@ -62,6 +62,6 @@ if __name__ == "__main__":
         results.append(sample)
 
     print('Saving results...')
-    output_path = os.path.join(config.output_dir, f'eval_{config.eval_llm}.json')
+    output_path = os.path.join(config.output_dir, 'eval.json')
     with open(output_path, 'w') as f:
         json.dump(results, f, indent=4)
